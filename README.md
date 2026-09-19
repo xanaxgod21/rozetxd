@@ -37,6 +37,33 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
+### Windows VDS (PowerShell)
+
+PowerShell'i **yönetici olarak** aç:
+
+```powershell
+# Node.js ve git yoksa (winget ile):
+winget install OpenJS.NodeJS.LTS
+winget install Git.Git
+# Kurduktan sonra PowerShell'i kapatıp yeniden aç
+
+git clone -b claude/self-bot-project-icch3r https://github.com/xanaxgod21/rozetxd.git
+cd rozetxd
+
+# Tek script ile kurulum (token'ı sorar):
+powershell -ExecutionPolicy Bypass -File .\setup.ps1
+```
+
+7/24 çalışması için (pm2, Windows'ta boot'ta otomatik başlatma dahil):
+
+```powershell
+npm install -g pm2 pm2-windows-startup
+pm2-startup install
+pm2 start ecosystem.config.js
+pm2 save
+pm2 logs rozetxd
+```
+
 ### 7/24 çalıştırma — pm2 (önerilen)
 
 `npm start` ile başlatırsan SSH bağlantın kopunca bot da durur. pm2 kullan:
