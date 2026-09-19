@@ -8,7 +8,7 @@
   "rareScan": {
     "autoJoinFromWatchChannel": true,
     "maxMembers": 0,
-    "cooldownMs": 30000,
+    "cooldownMs": 5000,
     "fetchTimeoutMs": 300000,
     "leaveAfterScan": true,
     "rareFlags": [

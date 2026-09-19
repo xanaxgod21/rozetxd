@@ -22,16 +22,29 @@ function extractInviteCodes(text) {
 }
 
 /**
- * Sunucunun TÜM üyelerini gateway üzerinden (chunk chunk) çeker.
+ * Sunucunun TÜM üyelerini gateway üzerinden (chunk chunk) mümkün olan en hızlı
+ * şekilde çeker.
  *
- * withPresences:false + time -> _fetchMany, yani "query yok, limit 0" ile
- * sunucudaki bütün üyeler istenir. Süre dolar ve liste tamamlanmazsa yarım
- * listeyle devam ETMEZ; hata fırlatır. Böylece kalabalık sunucuda da ya tam
- * liste gelir ya da net bir hata alırsın, eksik sonuç dönmez.
+ * En hızlı + eksiksiz yol tek bir REQUEST_GUILD_MEMBERS isteğidir:
+ *   query: ''  -> herkes (isim filtresi yok)
+ *   limit: 0   -> sınır yok, bütün üyeler
+ *   withPresences: false -> presence verisi çekilmez; üye başına çok daha az
+ *     veri gelir, yani belirgin şekilde daha hızlı tamamlanır (asıl hız kazancı).
+ *
+ * Not: Buradan sonrası Discord'un gateway'ine bağlıdır — üyeler 1000'erlik
+ * parçalar halinde Discord ne kadar hızlı yollarsa o hızda gelir. Client
+ * tarafında yapay bir bekleme/throttle yoktur, dolayısıyla bu zaten en hızlı
+ * tam-liste yöntemidir. Süre dolar ve liste tamamlanmazsa yarım listeyle
+ * devam ETMEZ; hata fırlatır (eksik sonuç dönmez).
  */
 async function fetchAllMembers(guild, timeoutMs) {
   try {
-    return await guild.members.fetch({ withPresences: false, time: timeoutMs });
+    return await guild.members.fetch({
+      query: '',
+      limit: 0,
+      withPresences: false,
+      time: timeoutMs,
+    });
   } catch (err) {
     throw new Error(
       `Üyelerin tamamı ${Math.round(timeoutMs / 1000)}sn içinde çekilemedi ` +

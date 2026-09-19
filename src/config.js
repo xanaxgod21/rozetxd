@@ -48,8 +48,9 @@ const config = {
     // Bundan fazla üyesi olan sunucuda tarama yapma. 0 = sınır yok
     // (kalabalık sunucular da taranır; ban riski + süre artar)
     maxMembers: json.rareScan?.maxMembers ?? 0,
-    // İki tarama arası bekleme (spam-join engeli)
-    cooldownMs: json.rareScan?.cooldownMs ?? 30000,
+    // İki tarama arası bekleme (spam-join engeli). Düşük = daha hızlı ardışık
+    // tarama ama daha yüksek ban riski. 0 = bekleme yok.
+    cooldownMs: json.rareScan?.cooldownMs ?? 5000,
     // Tüm üyeler bu süre içinde gelmezse hata verir (yarım listeyle devam etmez).
     // Kalabalık sunucular için yüksek tut.
     fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 300000,

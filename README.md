@@ -196,13 +196,20 @@ Bir sunucudaki nadir Discord rozetine (badge) sahip kişileri bulur.
 Sonuç: bir özet embed (kaç üye tarandı, rozet başına sayı) + tam listenin
 olduğu bir `.txt` eki (her satır: `kullanıcı (id) — rozetleri`).
 
+**Üye çekme hızı:** Bot tek bir istekle sunucudaki *herkesi* ister
+(`query=''`, `limit=0`) ve presence verisi çekmez — bu, tam listeyi almanın en
+hızlı yoludur. Buradan sonrası Discord'un gateway'ine bağlıdır: üyeler 1000'erlik
+parçalar halinde Discord ne kadar hızlı yollarsa o hızda gelir. Client tarafında
+yapay bir bekleme yoktur; gateway'i daha fazla zorlamak bağlantıyı düşürür veya
+hesabı ban ettirir, hızlandırmaz.
+
 ### Ayarlar (`config.json` > `rareScan`)
 
 | Ayar | Açıklama |
 | --- | --- |
 | `autoJoinFromWatchChannel` | İzlenen kanaldaki davetlerle otomatik girsin mi |
 | `maxMembers` | Bundan kalabalık sunucuda tarama yapma. **`0` = sınır yok** (kalabalık sunucular da taranır) |
-| `cooldownMs` | İki tarama arası bekleme (spam-join engeli) |
+| `cooldownMs` | İki tarama arası bekleme (spam-join engeli). Düşük = daha hızlı ardışık tarama, daha yüksek ban riski. `0` = beklemesiz (varsayılan 5000) |
 | `fetchTimeoutMs` | Tüm üyeler bu süre içinde gelmezse **hata verir, yarım listeyle devam etmez**. Kalabalık sunucu için yüksek tut (varsayılan 300000 = 5dk) |
 | `leaveAfterScan` | Tarama bitince sunucudan otomatik çıksın mı (varsayılan **açık**) |
 | `rareFlags` | "Nadir" sayılan rozetler (Discord UserFlags isimleri) |
