@@ -39,6 +39,32 @@ const config = {
 
   // config.json üzerinden ayarlanan, token gerektirmeyen tercihler
   presence: json.presence ?? null,
+
+  // Nadir rozet taraması: bu kanala davet yazılınca bot sunucuya girip tarar
+  watchChannelId: process.env.WATCH_CHANNEL_ID ?? json.watchChannelId ?? '',
+  rareScan: {
+    // İzlenen kanaldaki davetlerle otomatik sunucuya girsin mi
+    autoJoinFromWatchChannel: json.rareScan?.autoJoinFromWatchChannel ?? true,
+    // Bundan fazla üyesi olan sunucuda tam tarama yapma (ban riski + zaman)
+    maxMembers: json.rareScan?.maxMembers ?? 5000,
+    // İki tarama arası bekleme (spam-join engeli)
+    cooldownMs: json.rareScan?.cooldownMs ?? 30000,
+    // Üye çekme zaman aşımı
+    fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 60000,
+    // Tarama sonrası sunucudan otomatik çıksın mı
+    leaveAfterScan: json.rareScan?.leaveAfterScan ?? false,
+    // "Nadir" sayılan rozetler (UserFlags isimleri)
+    rareFlags: json.rareScan?.rareFlags ?? [
+      'DISCORD_EMPLOYEE',
+      'PARTNERED_SERVER_OWNER',
+      'HYPESQUAD_EVENTS',
+      'BUGHUNTER_LEVEL_1',
+      'BUGHUNTER_LEVEL_2',
+      'EARLY_SUPPORTER',
+      'EARLY_VERIFIED_BOT_DEVELOPER',
+      'DISCORD_CERTIFIED_MODERATOR',
+    ],
+  },
   webhook: {
     // Hangi olaylar webhook'a gitsin
     ready: json.webhook?.ready ?? true,

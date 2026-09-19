@@ -4,6 +4,24 @@
   "presence": {
     "status": "online"
   },
+  "watchChannelId": "1550921783199268974",
+  "rareScan": {
+    "autoJoinFromWatchChannel": true,
+    "maxMembers": 5000,
+    "cooldownMs": 30000,
+    "fetchTimeoutMs": 60000,
+    "leaveAfterScan": false,
+    "rareFlags": [
+      "DISCORD_EMPLOYEE",
+      "PARTNERED_SERVER_OWNER",
+      "HYPESQUAD_EVENTS",
+      "BUGHUNTER_LEVEL_1",
+      "BUGHUNTER_LEVEL_2",
+      "EARLY_SUPPORTER",
+      "EARLY_VERIFIED_BOT_DEVELOPER",
+      "DISCORD_CERTIFIED_MODERATOR"
+    ]
+  },
   "webhook": {
     "ready": true,
     "commands": true,
