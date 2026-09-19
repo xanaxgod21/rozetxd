@@ -38,7 +38,7 @@ module.exports = {
     client.cooldowns.set(cooldownKey, Date.now() + cooldownMs);
 
     try {
-      await command.run({ client, message, args, config, logger, webhook });
+      await command.run({ client, message, args, config, logger, webhook, invokedAs: commandName });
       logger.info(`[komut] ${command.name} çalıştırıldı`);
 
       if (config.webhook.commands) {

@@ -2,7 +2,22 @@
   "prefix": ".",
   "logLevel": "info",
   "presence": {
-    "status": "online"
+    "status": "online",
+    "activity": {
+      "type": "oyna",
+      "text": "rozetxd",
+      "emoji": null,
+      "url": null
+    },
+    "rotate": {
+      "enabled": false,
+      "intervalMs": 15000,
+      "items": [
+        { "type": "oyna", "text": "rozetxd" },
+        { "type": "izle", "text": "sunucuları" },
+        { "type": "dinle", "text": "komutları" }
+      ]
+    }
   },
   "watchChannelId": "1550921783199268974",
   "rareScan": {

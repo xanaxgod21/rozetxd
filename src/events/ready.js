@@ -19,15 +19,10 @@ module.exports = {
       logger.debug('OWNER_IDS boş, sadece kendi hesabın yetkili.');
     }
 
-    // config.json'da presence tanımlıysa uygula
-    if (config.presence?.status) {
-      try {
-        client.user.setStatus(config.presence.status);
-        logger.debug(`Durum ayarlandı: ${config.presence.status}`);
-      } catch (err) {
-        logger.warn('Durum ayarlanamadı:', err.message);
-      }
-    }
+    // config.json'daki durum + aktiviteyi uygula, döngü açıksa başlat
+    const { applyPresenceConfig, startRotation } = require('../utils/presence');
+    applyPresenceConfig(client, config.presence);
+    startRotation(client, config.presence);
 
     if (config.webhook.ready) {
       await webhook.embed({

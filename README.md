@@ -161,6 +161,9 @@ olayların webhook'a gideceği (`webhook.ready`, `webhook.commands`, `webhook.er
 | `.webhook test` | `wh` | Webhook bağlantısını test eder |
 | `.webhook gonder <mesaj>` | `wh` | Webhook üzerinden mesaj gönderir |
 | `.reload` | `yenile`, `rl` | Komutları botu kapatmadan yeniden yükler |
+| `.durum <tip>` | `status` | Çevrimiçi durumu değiştirir (online/boşta/meşgul/görünmez) |
+| `.aktivite <tip> <metin>` | `oyna`, `izle`, `dinle`, `ozeldurum` | Profil aktivitesi (oynuyor/izliyor/dinliyor/özel durum) |
+| `.dongu <ac\|kapat>` | `rotate` | config.json'daki durum döngüsünü aç/kapat |
 | `.gir <davet>` | `join`, `katil` | Davetteki sunucuya girer ve kalır (tarama yapmaz). **Herkes kullanabilir** |
 | `.nadir <davet>` | `rare`, `rozet` | Davetteki sunucuya girip nadir rozetli üyeleri listeler |
 
@@ -254,6 +257,40 @@ alınanlar varsayılanda **yok** — istersen `rareFlags`'e ekleyebilirsin.
 > Discord'un otomasyon tespitinde en çok işaretlediği iki davranıştır. Bu özellik
 > ana hesabının ban riskini belirgin şekilde artırır. `maxMembers` ve
 > `cooldownMs`'i düşük tutmak riski azaltır ama sıfırlamaz.
+
+## Profil / görünüm
+
+Self-bot hesabının durumunu ve aktivitesini ayarlar.
+
+**Durum:** `.durum online` · `boşta` · `meşgul` · `görünmez`
+
+**Aktivite:**
+- `.oyna Minecraft` → "Minecraft oynuyor"
+- `.izle Netflix` → "Netflix izliyor"
+- `.dinle Spotify` → "Spotify dinliyor"
+- `.aktivite yayın <metin>` → yayında
+- `.ozeldurum 😎 takılıyorum` → özel durum (emoji opsiyonel)
+- `.aktivite temizle` → aktiviteyi kaldır
+
+**Otomatik (config.json > `presence`):** Bot açılışta `status` + `activity`
+değerlerini uygular. `rotate.enabled: true` yaparsan `rotate.items`
+listesindeki durumları `intervalMs` aralığıyla döndürür (Discord alt sınırı
+~15sn). Çalışırken `.dongu ac` / `.dongu kapat` ile de kontrol edebilirsin.
+
+```json
+"presence": {
+  "status": "online",
+  "activity": { "type": "oyna", "text": "rozetxd" },
+  "rotate": {
+    "enabled": false,
+    "intervalMs": 15000,
+    "items": [
+      { "type": "oyna", "text": "rozetxd" },
+      { "type": "izle", "text": "sunucuları" }
+    ]
+  }
+}
+```
 
 ## Webhook kullanımı
 
