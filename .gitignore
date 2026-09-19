@@ -1,0 +1,25 @@
+# Bağımlılıklar
+node_modules/
+yarn.lock
+pnpm-lock.yaml
+
+# Gizli bilgiler - ASLA commit'lenmemeli
+.env
+.env.local
+*.token
+token.txt
+
+# Loglar
+logs/
+*.log
+npm-debug.log*
+
+# Editör / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Geçici
+tmp/
+temp/

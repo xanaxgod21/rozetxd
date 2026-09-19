@@ -1,0 +1,14 @@
+{
+  "prefix": ".",
+  "logLevel": "info",
+  "presence": {
+    "status": "online"
+  },
+  "webhook": {
+    "ready": true,
+    "commands": true,
+    "errors": true,
+    "username": "rozetxd",
+    "avatarUrl": null
+  }
+}

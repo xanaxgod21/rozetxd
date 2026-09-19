@@ -1,0 +1,22 @@
+{
+  "name": "rozetxd",
+  "version": "1.0.0",
+  "description": "Discord self-bot - modüler komut sistemi ve webhook loglama",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [
+    "discord",
+    "selfbot"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "discord.js-selfbot-v13": "^3.6.1",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  }
+}
