@@ -7,6 +7,9 @@ module.exports = {
   async run(client) {
     const { logger, webhook, config } = client;
 
+    // acceptInvite'ın session_id'yi bulabilmesi için shard'daki değeri client'a yaz
+    client.sessionId = client.ws?.shards?.first()?.sessionId ?? client.sessionId ?? null;
+
     logger.info(`Giriş yapıldı: ${client.user.tag} (${client.user.id})`);
     logger.info(`Ön ek: "${config.prefix}" | Komut: ${client.commands.size} | Sunucu: ${client.guilds.cache.size}`);
 

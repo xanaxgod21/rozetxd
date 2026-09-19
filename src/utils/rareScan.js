@@ -9,6 +9,21 @@ const logger = require('./logger');
 const INVITE_REGEX =
   /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([\w-]+)/gi;
 
+/**
+ * acceptInvite'ın gönderdiği session_id'yi düzeltir.
+ *
+ * Kütüphane bug'ı: Client.acceptInvite payload'a `session_id: this.sessionId`
+ * koyuyor ama sessionId gerçekte shard üzerinde tutuluyor, client'ta değil.
+ * Bu yüzden `session_id: undefined` gidiyor ve Discord 401 dönebiliyor.
+ * Katılmadan hemen önce shard'daki güncel değeri client'a yazıyoruz.
+ * @returns {string|null} güncel session id
+ */
+function ensureSessionId(client) {
+  const fromShard = client.ws?.shards?.first()?.sessionId;
+  if (fromShard) client.sessionId = fromShard;
+  return client.sessionId ?? null;
+}
+
 /** Metindeki tüm davet kodlarını (tekilleştirilmiş) çıkarır. */
 function extractInviteCodes(text) {
   if (!text) return [];
@@ -89,6 +104,7 @@ async function scanInvite(client, input, onStatus = () => {}) {
   const alreadyJoined = Boolean(preview.guild?.id && client.guilds.cache.has(preview.guild.id));
 
   onStatus(alreadyJoined ? `"${guildName}" zaten katılımda, taranıyor...` : `"${guildName}" sunucusuna giriliyor...`);
+  ensureSessionId(client);
   const guild = await client.acceptInvite(inviteCode).catch((err) => {
     throw new Error(`Sunucuya girilemedi: ${err.message}`);
   });
@@ -190,4 +206,4 @@ function buildReport(result) {
   return { embeds: [embed], files: [attachment] };
 }
 
-module.exports = { extractInviteCodes, scanInvite, buildReport };
+module.exports = { extractInviteCodes, scanInvite, buildReport, ensureSessionId };
