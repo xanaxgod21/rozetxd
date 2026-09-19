@@ -1,0 +1,53 @@
+# systemd servis dosyası (pm2 kullanmak istemiyorsan)
+#
+# Kurulum:
+#   sudo cp deploy/rozetxd.service /etc/systemd/system/
+#   sudo nano /etc/systemd/system/rozetxd.service   # User ve yolları düzenle
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now rozetxd
+#   journalctl -u rozetxd -f
+
+[Unit]
+Description=rozetxd self-bot
+Documentation=https://github.com/xanaxgod21/rozetxd
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Root ile çalıştırma. Önce kullanıcı aç:
+#   sudo useradd -r -m -d /opt/rozetxd -s /usr/sbin/nologin rozetxd
+User=rozetxd
+Group=rozetxd
+WorkingDirectory=/opt/rozetxd
+
+# node yolunu "which node" ile öğrenip buraya yaz
+ExecStart=/usr/bin/node src/index.js
+
+Restart=always
+RestartSec=5
+# Sürekli çökerse dakikada 5 denemeden fazlasını yapma
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+Environment=NODE_ENV=production
+Environment=NO_COLOR=1
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rozetxd
+
+# Güvenlik sıkılaştırma
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/rozetxd
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

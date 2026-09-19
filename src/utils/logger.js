@@ -4,14 +4,20 @@ const { config } = require('../config');
 
 const LEVELS = { debug: 10, info: 20, warn: 30, error: 40 };
 
-const COLORS = {
-  debug: '\x1b[90m',
-  info: '\x1b[36m',
-  warn: '\x1b[33m',
-  error: '\x1b[31m',
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
-};
+// Terminal değilse (pm2/systemd/docker log dosyası) veya NO_COLOR ayarlıysa
+// renk kodlarını kapat, yoksa log dosyaları okunmaz hale geliyor.
+const useColor = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
+
+const COLORS = useColor
+  ? {
+      debug: '\x1b[90m',
+      info: '\x1b[36m',
+      warn: '\x1b[33m',
+      error: '\x1b[31m',
+      reset: '\x1b[0m',
+      dim: '\x1b[2m',
+    }
+  : { debug: '', info: '', warn: '', error: '', reset: '', dim: '' };
 
 /** Log satırlarına token/webhook gibi gizli bilgiler sızmasın diye maskeler. */
 function redact(input) {
@@ -30,7 +36,11 @@ function redact(input) {
 }
 
 function timestamp() {
-  return new Date().toLocaleTimeString('tr-TR', { hour12: false });
+  // Terminalde sadece saat yeter; log dosyasında tarih de lazım.
+  const now = new Date();
+  const time = now.toLocaleTimeString('tr-TR', { hour12: false });
+  if (useColor) return time;
+  return `${now.toLocaleDateString('tr-TR')} ${time}`;
 }
 
 function write(level, args) {

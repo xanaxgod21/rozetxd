@@ -5,7 +5,12 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "setup": "bash setup.sh",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop rozetxd",
+    "pm2:restart": "pm2 restart rozetxd",
+    "pm2:logs": "pm2 logs rozetxd"
   },
   "keywords": [
     "discord",

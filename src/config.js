@@ -1,9 +1,11 @@
 'use strict';
 
-require('dotenv').config();
-
 const path = require('node:path');
 const fs = require('node:fs');
+
+// .env her zaman proje kökünden okunur; böylece botu hangi dizinden
+// başlatırsan başlat (systemd, pm2, docker) ayarlar bulunur.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 /** .env'deki virgüllü listeyi diziye çevirir. */
 function parseList(value) {
@@ -51,11 +53,21 @@ const config = {
  * Bot açılmadan önce zorunlu alanları doğrular.
  * Eksik varsa okunabilir bir hata fırlatır.
  */
+// .env.example'dan kopyalanıp doldurulmayı unutulan değerler
+const PLACEHOLDER_TOKENS = new Set([
+  'buraya_user_tokenini_yaz',
+  'your_token_here',
+  'token',
+  'xxx',
+]);
+
 function validate() {
   const errors = [];
 
   if (!config.token) {
     errors.push('TOKEN tanımlı değil. .env.example dosyasını .env olarak kopyalayıp doldur.');
+  } else if (PLACEHOLDER_TOKENS.has(config.token.toLowerCase())) {
+    errors.push('TOKEN hâlâ örnek değerde. .env dosyasını açıp gerçek token ile değiştir.');
   }
 
   if (config.webhookUrl && !/^https:\/\/(canary\.|ptb\.)?discord(app)?\.com\/api\/webhooks\//i.test(config.webhookUrl)) {

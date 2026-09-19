@@ -1,0 +1,19 @@
+services:
+  rozetxd:
+    build: .
+    container_name: rozetxd
+    restart: unless-stopped
+
+    # Token ve webhook .env dosyasından okunur
+    env_file: .env
+
+    # Ayarları konteyneri yeniden kurmadan değiştirebilmek için
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./logs:/app/logs
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
