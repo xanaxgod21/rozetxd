@@ -201,10 +201,10 @@ olduğu bir `.txt` eki (her satır: `kullanıcı (id) — rozetleri`).
 | Ayar | Açıklama |
 | --- | --- |
 | `autoJoinFromWatchChannel` | İzlenen kanaldaki davetlerle otomatik girsin mi |
-| `maxMembers` | Bundan kalabalık sunucuda tarama yapma (varsayılan 5000) |
+| `maxMembers` | Bundan kalabalık sunucuda tarama yapma. **`0` = sınır yok** (kalabalık sunucular da taranır) |
 | `cooldownMs` | İki tarama arası bekleme (spam-join engeli) |
-| `fetchTimeoutMs` | Üye çekme zaman aşımı; dolarsa eldeki üyelerle devam eder |
-| `leaveAfterScan` | Tarama bitince sunucudan otomatik çıksın mı |
+| `fetchTimeoutMs` | Tüm üyeler bu süre içinde gelmezse **hata verir, yarım listeyle devam etmez**. Kalabalık sunucu için yüksek tut (varsayılan 300000 = 5dk) |
+| `leaveAfterScan` | Tarama bitince sunucudan otomatik çıksın mı (varsayılan **açık**) |
 | `rareFlags` | "Nadir" sayılan rozetler (Discord UserFlags isimleri) |
 
 Varsayılan nadir rozetler: Discord Personeli, Partner, HypeSquad Events,

@@ -21,22 +21,23 @@ function extractInviteCodes(text) {
   return [...codes];
 }
 
-/** Üye çekmeyi zaman aşımıyla sarar; süre dolarsa eldeki cache ile devam eder. */
-async function fetchMembersWithTimeout(guild, timeoutMs) {
+/**
+ * Sunucunun TÜM üyelerini gateway üzerinden (chunk chunk) çeker.
+ *
+ * withPresences:false + time -> _fetchMany, yani "query yok, limit 0" ile
+ * sunucudaki bütün üyeler istenir. Süre dolar ve liste tamamlanmazsa yarım
+ * listeyle devam ETMEZ; hata fırlatır. Böylece kalabalık sunucuda da ya tam
+ * liste gelir ya da net bir hata alırsın, eksik sonuç dönmez.
+ */
+async function fetchAllMembers(guild, timeoutMs) {
   try {
-    const members = await Promise.race([
-      guild.members.fetch({ withPresences: false }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), timeoutMs),
-      ),
-    ]);
-    return { members, timedOut: false };
+    return await guild.members.fetch({ withPresences: false, time: timeoutMs });
   } catch (err) {
-    if (err.message === 'timeout') {
-      logger.warn(`[nadir] Üye çekme ${timeoutMs}ms'de tamamlanamadı, eldeki ${guild.members.cache.size} üye kullanılıyor.`);
-      return { members: guild.members.cache, timedOut: true };
-    }
-    throw err;
+    throw new Error(
+      `Üyelerin tamamı ${Math.round(timeoutMs / 1000)}sn içinde çekilemedi ` +
+        `(sunucu çok kalabalık olabilir). Yarım listeyle devam edilmedi. ` +
+        `config.json > rareScan.fetchTimeoutMs değerini artırıp tekrar dene. [${err.message}]`,
+    );
   }
 }
 
@@ -64,10 +65,11 @@ async function scanInvite(client, input, onStatus = () => {}) {
   const guildName = preview.guild?.name ?? 'bilinmeyen sunucu';
   const approx = preview.memberCount ?? preview.guild?.approximateMemberCount ?? 0;
 
-  if (approx && approx > rareScan.maxMembers) {
+  // maxMembers 0 (veya negatif) => sınır yok, kalabalık sunucular da taranır
+  if (rareScan.maxMembers > 0 && approx && approx > rareScan.maxMembers) {
     throw new Error(
       `"${guildName}" çok kalabalık (~${approx} üye, sınır ${rareScan.maxMembers}). ` +
-        'config.json > rareScan.maxMembers ile artırabilirsin.',
+        'config.json > rareScan.maxMembers = 0 yaparsan sınır kalkar.',
     );
   }
 
@@ -80,8 +82,9 @@ async function scanInvite(client, input, onStatus = () => {}) {
 
   if (!guild?.members) throw new Error('Sunucu nesnesi alınamadı (davet bir kanala mı ait?).');
 
-  onStatus('Üyeler çekiliyor, bu biraz sürebilir...');
-  const { members, timedOut } = await fetchMembersWithTimeout(guild, rareScan.fetchTimeoutMs);
+  onStatus('Tüm üyeler çekiliyor (kalabalık sunucuda uzun sürebilir, bekleniyor)...');
+  const members = await fetchAllMembers(guild, rareScan.fetchTimeoutMs);
+  const timedOut = false;
 
   const rareMembers = [];
   for (const member of members.values()) {

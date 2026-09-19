@@ -45,14 +45,16 @@ const config = {
   rareScan: {
     // İzlenen kanaldaki davetlerle otomatik sunucuya girsin mi
     autoJoinFromWatchChannel: json.rareScan?.autoJoinFromWatchChannel ?? true,
-    // Bundan fazla üyesi olan sunucuda tam tarama yapma (ban riski + zaman)
-    maxMembers: json.rareScan?.maxMembers ?? 5000,
+    // Bundan fazla üyesi olan sunucuda tarama yapma. 0 = sınır yok
+    // (kalabalık sunucular da taranır; ban riski + süre artar)
+    maxMembers: json.rareScan?.maxMembers ?? 0,
     // İki tarama arası bekleme (spam-join engeli)
     cooldownMs: json.rareScan?.cooldownMs ?? 30000,
-    // Üye çekme zaman aşımı
-    fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 60000,
+    // Tüm üyeler bu süre içinde gelmezse hata verir (yarım listeyle devam etmez).
+    // Kalabalık sunucular için yüksek tut.
+    fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 300000,
     // Tarama sonrası sunucudan otomatik çıksın mı
-    leaveAfterScan: json.rareScan?.leaveAfterScan ?? false,
+    leaveAfterScan: json.rareScan?.leaveAfterScan ?? true,
     // "Nadir" sayılan rozetler (UserFlags isimleri)
     rareFlags: json.rareScan?.rareFlags ?? [
       'DISCORD_EMPLOYEE',
