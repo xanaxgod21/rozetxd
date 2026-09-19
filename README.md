@@ -161,6 +161,7 @@ olayların webhook'a gideceği (`webhook.ready`, `webhook.commands`, `webhook.er
 | `.webhook test` | `wh` | Webhook bağlantısını test eder |
 | `.webhook gonder <mesaj>` | `wh` | Webhook üzerinden mesaj gönderir |
 | `.reload` | `yenile`, `rl` | Komutları botu kapatmadan yeniden yükler |
+| `.gir <davet>` | `join`, `katil` | Davetteki sunucuya girer ve kalır (tarama yapmaz) |
 | `.nadir <davet>` | `rare`, `rozet` | Davetteki sunucuya girip nadir rozetli üyeleri listeler |
 
 ## Yeni komut ekleme
