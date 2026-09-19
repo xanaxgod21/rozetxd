@@ -161,7 +161,7 @@ olayların webhook'a gideceği (`webhook.ready`, `webhook.commands`, `webhook.er
 | `.webhook test` | `wh` | Webhook bağlantısını test eder |
 | `.webhook gonder <mesaj>` | `wh` | Webhook üzerinden mesaj gönderir |
 | `.reload` | `yenile`, `rl` | Komutları botu kapatmadan yeniden yükler |
-| `.gir <davet>` | `join`, `katil` | Davetteki sunucuya girer ve kalır (tarama yapmaz) |
+| `.gir <davet>` | `join`, `katil` | Davetteki sunucuya girer ve kalır (tarama yapmaz). **Herkes kullanabilir** |
 | `.nadir <davet>` | `rare`, `rozet` | Davetteki sunucuya girip nadir rozetli üyeleri listeler |
 
 ## Yeni komut ekleme
@@ -184,6 +184,8 @@ module.exports = {
   },
 };
 ```
+
+Komutu **herkesin** (sadece owner değil) kullanabilmesi için komuta `everyone: true` ekle. Token'ı girilen hesap (self-bot) komutu işler.
 
 `run` fonksiyonuna gelen alanlar:
 

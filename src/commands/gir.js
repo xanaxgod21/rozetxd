@@ -9,6 +9,8 @@ module.exports = {
   usage: 'gir <davet linki>',
   category: 'araçlar',
   cooldown: 5000,
+  // Herkes tetikleyebilir; token'ı girilen hesap (self-bot) sunucuya girer.
+  everyone: true,
 
   async run({ client, message, args, config, logger, webhook }) {
     const input = args.join(' ');

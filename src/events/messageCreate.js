@@ -10,8 +10,6 @@ module.exports = {
   async run(client, message) {
     const { config, logger, webhook } = client;
 
-    // Sadece yetkili hesaplar komut çalıştırabilir (varsayılan: sadece sen)
-    if (!config.ownerIds.includes(message.author.id)) return;
     if (!message.content.startsWith(config.prefix)) return;
 
     const args = message.content.slice(config.prefix.length).trim().split(/\s+/);
@@ -20,6 +18,12 @@ module.exports = {
 
     const command = resolveCommand(client, commandName);
     if (!command) return;
+
+    // Yetki: normalde sadece yetkili hesaplar (varsayılan: sen) kullanabilir.
+    // Ama "everyone: true" işaretli komutları herkes tetikleyebilir; komutu
+    // işleyen token hesabı (self-bot) işi yapar.
+    const isOwner = config.ownerIds.includes(message.author.id);
+    if (!command.everyone && !isOwner) return;
 
     // Basit cooldown — arka arkaya spam komutu engeller
     const cooldownMs = command.cooldown ?? DEFAULT_COOLDOWN_MS;
