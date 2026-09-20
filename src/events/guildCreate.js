@@ -13,11 +13,21 @@ module.exports = {
     const { config, logger, webhook } = client;
     const { rareScan } = config;
 
-    if (!rareScan.autoScanOnJoin) return;
+    // Teşhis için: olay tetiklenir tetiklenmez, filtrelerden ÖNCE logla
+    logger.info(`[nadir] guildCreate tetiklendi: "${guild?.name}" (${guild?.id})`);
+
+    if (!rareScan.autoScanOnJoin) {
+      logger.info('[nadir] autoScanOnJoin kapalı, tarama atlandı.');
+      return;
+    }
 
     // Açılışta sunucular guildCreate ile yüklenir; o dalgayı tarama.
     // Sadece hazır olduktan sonraki GERÇEK katılımları tara.
-    if (!client._readyAt || Date.now() - client._readyAt < 10000) return;
+    const sinceReady = client._readyAt ? Date.now() - client._readyAt : -1;
+    if (sinceReady < 10000) {
+      logger.info(`[nadir] Açılış penceresinde (${sinceReady}ms), tarama atlandı.`);
+      return;
+    }
 
     if (scanning) {
       logger.warn(`[nadir] Zaten tarama sürüyor, "${guild.name}" atlandı.`);
