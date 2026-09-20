@@ -223,21 +223,23 @@ function buildReport(result) {
     return { embeds: [embed] };
   }
 
-  // İlk 25'i embed alanı olarak; tamamı .txt ekinde
-  const preview = rareMembers.slice(0, 25).map((m) => {
+  // İlk kişileri embed alanına yaz: rozet + kullanıcı + tıklanır mention.
+  // <@id> embed içinde tıklanır olarak görünür ve PING atmaz.
+  const previewMembers = rareMembers.slice(0, 20);
+  const preview = previewMembers.map((m) => {
     const icons = m.badges.map((f) => labelFor(f).emoji).join('');
-    return `${icons} ${m.tag}`;
+    return `${icons} ${m.tag} <@${m.id}>`;
   });
 
   const previewText = preview.join('\n');
   if (previewText.length <= 1024) {
-    embed.addField(`İlk ${preview.length} kişi`, previewText || '—');
+    embed.addField(`İlk ${previewMembers.length} kişi`, previewText || '—');
   }
 
-  // Tam liste dosyası
+  // Tam liste dosyası: kullanıcı, ham ID ve <@id> mention (kopyalayıp pingle)
   const lines = rareMembers.map((m) => {
     const labels = m.badges.map((f) => labelFor(f).label).join(', ');
-    return `${m.tag} (${m.id}) — ${labels}`;
+    return `${m.tag} | ${m.id} | <@${m.id}> — ${labels}`;
   });
   const fileContent =
     `Sunucu: ${guildName}\nTaranan üye: ${total}${timedOut ? ' (kısmi)' : ''}\n` +
