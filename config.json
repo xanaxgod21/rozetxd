@@ -36,9 +36,9 @@
     "outputChannelId": "",
     "fetchTimeoutMs": 90000,
     "deepScan": true,
-    "deepScanMaxRequests": 350,
-    "deepScanTimeBudgetMs": 180000,
-    "deepScanDelayMs": 250,
+    "deepScanMaxRequests": 600,
+    "deepScanTimeBudgetMs": 300000,
+    "deepScanDelayMs": 200,
     "rareFlags": [
       "DISCORD_EMPLOYEE",
       "PARTNERED_SERVER_OWNER",

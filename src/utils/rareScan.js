@@ -7,8 +7,18 @@ const logger = require('./logger');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Derin tarama için isim ön-ekleri (Türkçe karakterler dahil)
-const DEEP_CHARSET = 'abcdefghijklmnopqrstuvwxyzçğıioöşü0123456789_.'.split('');
+// Derin tarama için isim ön-ekleri.
+// Latin + Türkçe + rakam + Kiril (Rusça) + Arapça harfleri.
+// Not: Çince/Japonca/Korece binlerce karakter olduğundan ön-ekle tam
+// taranamaz; ama bu dillerdeki kullanıcıların çoğunun latin/rakam takma adı da
+// olduğundan büyük kısmı yine yakalanır.
+const DEEP_CHARSET = [
+  ...'abcdefghijklmnopqrstuvwxyz',
+  ...'çğıioöşü',
+  ...'0123456789_.',
+  ...'абвгдежзийклмнопрстуфхцчшщъыьэюя', // Kiril
+  ...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي', // Arapça
+];
 
 /**
  * Girdiye göre, hesabın ZATEN ÜYE OLDUĞU bir sunucuyu bulur.

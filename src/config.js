@@ -78,11 +78,11 @@ const config = {
     deepScan: json.rareScan?.deepScan ?? true,
     // Derin taramada en fazla kaç sorgu atılsın (yüksek = daha çok üye, daha
     // uzun süre, daha yüksek ban riski).
-    deepScanMaxRequests: json.rareScan?.deepScanMaxRequests ?? 350,
+    deepScanMaxRequests: json.rareScan?.deepScanMaxRequests ?? 600,
     // Derin tarama toplam süre bütçesi (ms).
-    deepScanTimeBudgetMs: json.rareScan?.deepScanTimeBudgetMs ?? 180000,
+    deepScanTimeBudgetMs: json.rareScan?.deepScanTimeBudgetMs ?? 300000,
     // Sorgular arası bekleme (ms) — düşük = hızlı ama daha riskli.
-    deepScanDelayMs: json.rareScan?.deepScanDelayMs ?? 250,
+    deepScanDelayMs: json.rareScan?.deepScanDelayMs ?? 200,
     // "Nadir" sayılan rozetler (UserFlags isimleri)
     rareFlags: json.rareScan?.rareFlags ?? [
       'DISCORD_EMPLOYEE',
