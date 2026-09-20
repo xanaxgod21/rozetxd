@@ -37,23 +37,30 @@ function resolveGuild(client, input, message) {
  * Not: Buradan sonrası Discord'un gateway'ine bağlıdır — üyeler 1000'erlik
  * parçalar halinde Discord ne kadar hızlı yollarsa o hızda gelir. Client
  * tarafında yapay bir bekleme/throttle yoktur, dolayısıyla bu zaten en hızlı
- * tam-liste yöntemidir. Süre dolar ve liste tamamlanmazsa yarım listeyle
- * devam ETMEZ; hata fırlatır (eksik sonuç dönmez).
+ * tam-liste yöntemidir.
+ *
+ * Süre dolar ve tüm liste gelmezse (büyük sunucularda user hesabıyla sık olur)
+ * HATA VERMEZ: o ana kadar gelen üyeler guild.members.cache'de birikmiştir,
+ * onlarla (kısmi) devam eder. Böylece kalabalık sunucuda bile en azından
+ * gelen üyeler arasından nadir rozetliler bulunup atılır.
+ * @returns {Promise<{members, timedOut:boolean}>}
  */
 async function fetchAllMembers(guild, timeoutMs) {
   try {
-    return await guild.members.fetch({
+    const members = await guild.members.fetch({
       query: '',
       limit: 0,
       withPresences: false,
       time: timeoutMs,
     });
+    return { members, timedOut: false };
   } catch (err) {
-    throw new Error(
-      `Üyelerin tamamı ${Math.round(timeoutMs / 1000)}sn içinde çekilemedi ` +
-        `(sunucu çok kalabalık olabilir). Yarım listeyle devam edilmedi. ` +
-        `config.json > rareScan.fetchTimeoutMs değerini artırıp tekrar dene. [${err.message}]`,
+    const partial = guild.members.cache;
+    logger.warn(
+      `[nadir] Tüm üyeler ${Math.round(timeoutMs / 1000)}sn'de gelmedi (büyük sunucu). ` +
+        `Eldeki ${partial.size} üyeyle devam ediliyor (kısmi liste). [${err.message}]`,
     );
+    return { members: partial, timedOut: true };
   }
 }
 
@@ -73,9 +80,8 @@ async function scanGuild(client, guild, onStatus = () => {}) {
 
   const guildName = guild.name ?? 'bilinmeyen sunucu';
 
-  onStatus(`"${guildName}" taranıyor — tüm üyeler çekiliyor (kalabalık sunucuda uzun sürebilir)...`);
-  const members = await fetchAllMembers(guild, rareScan.fetchTimeoutMs);
-  const timedOut = false;
+  onStatus(`"${guildName}" taranıyor — üyeler çekiliyor (kalabalık sunucuda uzun sürebilir)...`);
+  const { members, timedOut } = await fetchAllMembers(guild, rareScan.fetchTimeoutMs);
 
   const rareMembers = [];
   for (const member of members.values()) {

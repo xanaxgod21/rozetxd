@@ -25,7 +25,7 @@
     "outputCategoryId": "",
     "channelSuffix": "-rozetler",
     "outputChannelId": "",
-    "fetchTimeoutMs": 300000,
+    "fetchTimeoutMs": 90000,
     "rareFlags": [
       "DISCORD_EMPLOYEE",
       "PARTNERED_SERVER_OWNER",

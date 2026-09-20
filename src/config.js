@@ -70,9 +70,10 @@ const config = {
     // Alternatif: outputGuildId yoksa buraya (tek sabit kanal ID) gönderir.
     // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
     outputChannelId: process.env.OUTPUT_CHANNEL_ID ?? json.rareScan?.outputChannelId ?? '',
-    // Tüm üyeler bu süre içinde gelmezse hata verir (yarım listeyle devam etmez).
-    // Kalabalık sunucular için yüksek tut.
-    fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 300000,
+    // Üye çekme için süre bütçesi. Süre dolarsa o ana kadar gelen üyelerle
+    // (kısmi) devam eder. Büyük sunucuda daha çok üye için artır, daha çabuk
+    // sonuç için azalt.
+    fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 90000,
     // "Nadir" sayılan rozetler (UserFlags isimleri)
     rareFlags: json.rareScan?.rareFlags ?? [
       'DISCORD_EMPLOYEE',
