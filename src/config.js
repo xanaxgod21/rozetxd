@@ -23,6 +23,17 @@ function cleanToken(raw) {
   return t;
 }
 
+/**
+ * İlk boş olmayan değeri döner. process.env'de BOŞ bir değişken (ör.
+ * OUTPUT_GUILD_ID=) olsa bile onu "ayarlı" saymayıp config.json'a düşer.
+ */
+function firstNonEmpty(...vals) {
+  for (const v of vals) {
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+}
+
 /** .env'deki virgüllü listeyi diziye çevirir. */
 function parseList(value) {
   if (!value) return [];
@@ -64,14 +75,14 @@ const config = {
     autoScanOnJoin: json.rareScan?.autoScanOnJoin ?? true,
     // Sonuçların yazılacağı KONTROL sunucusu (senin, kanal açma yetkin olan).
     // Bot burada her taranan sunucu için "<isim>-rozetler" kanalı açar.
-    outputGuildId: process.env.OUTPUT_GUILD_ID ?? json.rareScan?.outputGuildId ?? '',
+    outputGuildId: firstNonEmpty(process.env.OUTPUT_GUILD_ID, json.rareScan?.outputGuildId),
     // İsteğe bağlı: açılan kanalların konacağı kategori ID'si.
-    outputCategoryId: process.env.OUTPUT_CATEGORY_ID ?? json.rareScan?.outputCategoryId ?? '',
+    outputCategoryId: firstNonEmpty(process.env.OUTPUT_CATEGORY_ID, json.rareScan?.outputCategoryId),
     // Açılan kanal adının sonuna eklenecek ek. "-rozetler" -> "xx-rozetler"
     channelSuffix: json.rareScan?.channelSuffix ?? '-rozetler',
     // Alternatif: outputGuildId yoksa buraya (tek sabit kanal ID) gönderir.
     // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
-    outputChannelId: process.env.OUTPUT_CHANNEL_ID ?? json.rareScan?.outputChannelId ?? '',
+    outputChannelId: firstNonEmpty(process.env.OUTPUT_CHANNEL_ID, json.rareScan?.outputChannelId),
     // Üye çekme için süre bütçesi (deepScan kapalıyken). Süre dolarsa o ana
     // kadar gelen üyelerle (kısmi) devam eder.
     fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 90000,

@@ -14,6 +14,17 @@ module.exports = {
     logger.info(`Giriş yapıldı: ${client.user.tag} (${client.user.id})`);
     logger.info(`Ön ek: "${config.prefix}" | Komut: ${client.commands.size} | Sunucu: ${client.guilds.cache.size}`);
 
+    // Teşhis: kanal açma hedefi düzgün yüklendi mi + o sunucuda mıyız
+    const ogid = config.rareScan.outputGuildId;
+    if (ogid) {
+      const og = client.guilds.cache.get(ogid);
+      logger.info(
+        `[nadir] outputGuildId=${ogid} -> ${og ? `"${og.name}" bulundu (kanallar burada açılacak)` : 'BULUNAMADI (hesap bu sunucuda değil / ID yanlış)'}`,
+      );
+    } else {
+      logger.info('[nadir] outputGuildId AYARLI DEĞİL -> kanal açılmaz (webhook/dosyaya düşer).');
+    }
+
     // OWNER_IDS boşsa sadece kendi hesabın komut kullanabilsin
     if (!config.ownerIds.length) {
       config.ownerIds.push(client.user.id);
