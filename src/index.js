@@ -57,9 +57,27 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
   });
 }
 
+// Teşhis: token'ın ŞEKLİ (içeriği değil). Geçerli bir user token "A.B.C"
+// biçiminde 3 parçalı ve tipik olarak ~70+ karakterdir. Bunun dışındaysa
+// büyük ihtimalle eksik/yanlış kopyalanmış demektir.
+{
+  const parts = config.token.split('.');
+  logger.info(`Token şekli: ${config.token.length} karakter, ${parts.length} parça (nokta ile).`);
+  if (parts.length !== 3) {
+    logger.warn('Token 3 parçalı (A.B.C) değil — büyük ihtimalle eksik/yanlış kopyalanmış.');
+  } else if (config.token.length < 50) {
+    logger.warn('Token beklenenden kısa — eksik kopyalanmış olabilir.');
+  }
+}
+
 client.login(config.token).catch((err) => {
   logger.error('Giriş başarısız. Token geçersiz veya süresi dolmuş olabilir.');
   logger.error(err.message);
+  logger.error(
+    'ÖNEMLİ: Bu hatayı Discord veriyor, kod değil. Ya token yanlış/eksik ' +
+      'kopyalandı, ya bot token\'ı girildi (user token olmalı), ya da hesap ' +
+      'kilitli/yanmış. Hesaba tarayıcıdan normal giriş yapabildiğinden emin ol.',
+  );
   process.exit(1);
 });
 

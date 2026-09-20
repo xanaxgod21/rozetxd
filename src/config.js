@@ -11,6 +11,18 @@ const fs = require('node:fs');
 // ikisinin aynı token'a düşmesini engeller: her bot kendi .env'ini kullanır.
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), override: true });
 
+/**
+ * Token'ı temizler: baş/son tırnak, "Bot " öneki, her türlü boşluk/newline.
+ * Yanlış yapıştırma kaynaklı görünmez karakterleri de atar.
+ */
+function cleanToken(raw) {
+  let t = String(raw ?? '').trim();
+  t = t.replace(/^["']|["']$/g, '').trim(); // baş/son tırnak
+  t = t.replace(/^Bot\s+/i, ''); // yanlışlıkla "Bot " öneki (self-bot user token ister)
+  t = t.replace(/\s+/g, ''); // token'da boşluk olmaz
+  return t;
+}
+
 /** .env'deki virgüllü listeyi diziye çevirir. */
 function parseList(value) {
   if (!value) return [];
@@ -35,7 +47,7 @@ function readJsonConfig() {
 const json = readJsonConfig();
 
 const config = {
-  token: process.env.TOKEN ?? '',
+  token: cleanToken(process.env.TOKEN),
   prefix: process.env.PREFIX ?? json.prefix ?? '.',
   webhookUrl: process.env.WEBHOOK_URL ?? '',
   ownerIds: parseList(process.env.OWNER_IDS),
