@@ -37,7 +37,9 @@ function readJsonConfig() {
   const file = path.join(__dirname, '..', 'config.json');
   if (!fs.existsSync(file)) return {};
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    // Notepad'in eklediği BOM (﻿) işaretini temizle, yoksa JSON.parse patlar
+    const raw = fs.readFileSync(file, 'utf8').replace(/^﻿/, '').trim();
+    return JSON.parse(raw);
   } catch (err) {
     console.warn(`[config] config.json okunamadı, varsayılanlar kullanılıyor: ${err.message}`);
     return {};

@@ -233,7 +233,7 @@ function buildReport(result) {
 
   const previewText = preview.join('\n');
   if (previewText.length <= 1024) {
-    embed.addField(`İlk ${previewMembers.length} kişi`, previewText || '—');
+    embed.addFields({ name: `İlk ${previewMembers.length} kişi`, value: previewText || '—' });
   }
 
   // Tam liste dosyası: kullanıcı, ham ID ve <@id> mention (kopyalayıp pingle)
