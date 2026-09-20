@@ -38,6 +38,9 @@ async function createOrFindChannel(client, guildName) {
     return null;
   }
 
+  // Rol/izin yeni verilmiş olabilir; taze üye bilgisi çek (önbellek bayat olmasın)
+  await outGuild.members.fetchMe?.().catch(() => null);
+
   const wanted = sanitizeChannelName(guildName, rareScan.channelSuffix ?? '-rozetler');
 
   const existing = outGuild.channels.cache.find(
@@ -45,18 +48,33 @@ async function createOrFindChannel(client, guildName) {
   );
   if (existing) return existing;
 
-  try {
-    const channel = await outGuild.channels.create(wanted, {
-      type: 'GUILD_TEXT',
-      parent: rareScan.outputCategoryId || undefined,
-      reason: 'rozetxd nadir rozet listesi',
-    });
-    logger.info(`[nadir] Kanal açıldı: #${channel.name} (${outGuild.name})`);
-    return channel;
-  } catch (err) {
-    logger.warn(`[nadir] Kanal açılamadı (kanal açma yetkin var mı?): ${err.message}`);
-    return null;
+  // Önce kategori altında dene; kategori engelliyorsa kategorisiz (kök) dene
+  const attempts = rareScan.outputCategoryId
+    ? [rareScan.outputCategoryId, undefined]
+    : [undefined];
+
+  let lastErr;
+  for (const parent of attempts) {
+    try {
+      const channel = await outGuild.channels.create(wanted, {
+        type: 'GUILD_TEXT',
+        parent: parent || undefined,
+        reason: 'rozetxd nadir rozet listesi',
+      });
+      logger.info(
+        `[nadir] Kanal açıldı: #${channel.name} (${outGuild.name})${parent ? ' [kategori altında]' : ' [kök]'}`,
+      );
+      return channel;
+    } catch (err) {
+      lastErr = err;
+      if (parent) {
+        logger.warn(`[nadir] Kategori altında açılamadı (${err.message}), kategorisiz deneniyor...`);
+      }
+    }
   }
+
+  logger.warn(`[nadir] Kanal açılamadı: ${lastErr?.message} — kylliie__ hesabının "Kanalları Yönet" yetkisi var mı?`);
+  return null;
 }
 
 /**

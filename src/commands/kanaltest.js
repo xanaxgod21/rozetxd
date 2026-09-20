@@ -28,27 +28,41 @@ module.exports = {
       return message.channel.send('```\n' + out.join('\n') + '\n```');
     }
 
-    // Yetki kontrolü (mümkünse)
+    // Rol yeni verilmiş olabilir -> TAZE üye çek (önbellek bayat olmasın)
+    let me = null;
     try {
-      const me = g.members?.me ?? g.me ?? (client.user ? g.members?.cache?.get(client.user.id) : null);
-      const canManage = me?.permissions?.has?.('MANAGE_CHANNELS');
-      out.push(`Kanalları Yönet yetkisi: ${canManage === true ? 'VAR' : canManage === false ? 'YOK' : 'bilinmiyor'}`);
+      me = await g.members.fetchMe();
     } catch {
-      out.push('Kanalları Yönet yetkisi: kontrol edilemedi');
+      me = g.members?.me ?? g.me ?? (client.user ? g.members?.cache?.get(client.user.id) : null);
     }
+    const isAdmin = me?.permissions?.has?.('ADMINISTRATOR');
+    const canManage = me?.permissions?.has?.('MANAGE_CHANNELS');
+    out.push(`Yönetici: ${isAdmin === true ? 'VAR' : isAdmin === false ? 'YOK' : '?'} | Kanalları Yönet: ${canManage === true ? 'VAR' : canManage === false ? 'YOK' : '?'}`);
 
-    // Gerçekten kanal açmayı dene
-    try {
-      const ch = await g.channels.create('rozetxd-test', {
-        type: 'GUILD_TEXT',
-        parent: outputCategoryId || undefined,
-        reason: 'rozetxd kanal açma testi',
-      });
-      out.push(`SONUÇ: ✅ KANAL AÇILDI -> #${ch.name} (${ch.id})`);
-      out.push('Test başarılı. Bu "rozetxd-test" kanalını silebilirsin.');
-    } catch (err) {
-      out.push(`SONUÇ: ❌ Kanal AÇILAMADI -> ${err.message}`);
-      out.push('Genelde sebep: hesabın o sunucuda "Kanalları Yönet" yetkisi yok.');
+    // Kanal açmayı dene: önce kategori altında, olmazsa kategorisiz
+    const attempts = outputCategoryId ? [outputCategoryId, undefined] : [undefined];
+    let done = false;
+    let lastErr;
+    for (const parent of attempts) {
+      try {
+        const ch = await g.channels.create('rozetxd-test', {
+          type: 'GUILD_TEXT',
+          parent: parent || undefined,
+          reason: 'rozetxd kanal açma testi',
+        });
+        out.push(`SONUÇ: ✅ KANAL AÇILDI -> #${ch.name}${parent ? ' (kategori altında)' : ' (kök)'}`);
+        out.push('Test başarılı. "rozetxd-test" kanalını silebilirsin.');
+        done = true;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (parent) out.push(`Kategori altında olmadı (${err.message}) -> kategorisiz deneniyor...`);
+      }
+    }
+    if (!done) {
+      out.push(`SONUÇ: ❌ Kanal AÇILAMADI -> ${lastErr?.message}`);
+      out.push('Sebep: kylliie__ hesabının bu sunucuda "Kanalları Yönet" yetkisi yok.');
+      out.push('Rolü KYLLIIE__ hesabına verdiğinden ve botu restart ettiğinden emin ol.');
     }
 
     return message.channel.send('```\n' + out.join('\n') + '\n```');
