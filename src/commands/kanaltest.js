@@ -38,6 +38,17 @@ module.exports = {
     const isAdmin = me?.permissions?.has?.('ADMINISTRATOR');
     const canManage = me?.permissions?.has?.('MANAGE_CHANNELS');
     out.push(`Yönetici: ${isAdmin === true ? 'VAR' : isAdmin === false ? 'YOK' : '?'} | Kanalları Yönet: ${canManage === true ? 'VAR' : canManage === false ? 'YOK' : '?'}`);
+    out.push(`Rol sayısı: ${me?.roles?.cache?.size ?? '?'}`);
+
+    // Kurallar kapısı (membership screening) — takılıysa hesap hiçbir şey yapamaz
+    if (me?.pending === true) {
+      out.push('⚠️ pending=EVET -> kylliie__ bu sunucuda KURALLAR KAPISINDA takılı!');
+      out.push('Çözüm: kylliie__ hesabından bu sunucuya girip "Kuralları Kabul Et"e bas.');
+    }
+    // Susturulmuş mu (timeout)
+    if (me?.communicationDisabledUntilTimestamp && me.communicationDisabledUntilTimestamp > Date.now()) {
+      out.push('⚠️ Hesap TIMEOUT (susturulmuş) -> işlem yapamaz.');
+    }
 
     // Kanal açmayı dene: önce kategori altında, olmazsa kategorisiz
     const attempts = outputCategoryId ? [outputCategoryId, undefined] : [undefined];
