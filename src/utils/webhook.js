@@ -58,6 +58,53 @@ class WebhookClient {
     return this.send({ embeds: [embed] });
   }
 
+  /**
+   * Embed + dosya ekini (tam liste .txt) webhook'a gönderir (multipart).
+   * buildReport çıktısını doğrudan alır: { embeds: [MessageEmbed], files: [MessageAttachment] }
+   * @returns {Promise<boolean>}
+   */
+  async sendReport(report) {
+    if (!this.enabled) return false;
+
+    const embeds = (report.embeds ?? []).map((e) => (typeof e.toJSON === 'function' ? e.toJSON() : e));
+    const files = report.files ?? [];
+
+    const payload = {
+      username: config.webhook.username,
+      allowed_mentions: { parse: [] },
+      embeds,
+    };
+    if (config.webhook.avatarUrl) payload.avatar_url = config.webhook.avatarUrl;
+
+    const form = new FormData();
+    form.append('payload_json', JSON.stringify(payload));
+    files.forEach((f, i) => {
+      const buf = f.attachment ?? f;
+      const name = f.name ?? `dosya-${i}.txt`;
+      form.append(`files[${i}]`, new Blob([buf]), name);
+    });
+
+    for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
+      try {
+        const res = await fetch(this.url, { method: 'POST', body: form });
+        if (res.status === 429) {
+          const body = await res.json().catch(() => ({}));
+          await sleep(Math.ceil((body.retry_after ?? 1) * 1000));
+          continue;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return true;
+      } catch (err) {
+        if (attempt === this.maxRetries) {
+          logger.warn(`[webhook] Rapor gönderilemedi: ${err.message}`);
+          return false;
+        }
+        await sleep(500 * 2 ** attempt);
+      }
+    }
+    return false;
+  }
+
   /** Hata bildirimi (kırmızı embed). */
   error(title, err) {
     const detail = err instanceof Error ? (err.stack ?? err.message) : String(err);

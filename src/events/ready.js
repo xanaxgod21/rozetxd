@@ -7,6 +7,10 @@ module.exports = {
   async run(client) {
     const { logger, webhook, config } = client;
 
+    // Otomatik tarama, açılıştaki sunucu yükleme dalgasını taramasın diye
+    // "ne zaman hazır olduk" damgası
+    client._readyAt = Date.now();
+
     logger.info(`Giriş yapıldı: ${client.user.tag} (${client.user.id})`);
     logger.info(`Ön ek: "${config.prefix}" | Komut: ${client.commands.size} | Sunucu: ${client.guilds.cache.size}`);
 

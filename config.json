@@ -20,6 +20,8 @@
     }
   },
   "rareScan": {
+    "autoScanOnJoin": true,
+    "outputChannelId": "",
     "fetchTimeoutMs": 300000,
     "rareFlags": [
       "DISCORD_EMPLOYEE",

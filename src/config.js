@@ -46,6 +46,11 @@ const config = {
 
   // Nadir rozet taraması (yalnızca hesabın ZATEN üye olduğu sunucular; katılma yok)
   rareScan: {
+    // Sen bir sunucuya elle girdiğin an bot otomatik tarasın mı
+    autoScanOnJoin: json.rareScan?.autoScanOnJoin ?? true,
+    // Otomatik tarama sonucunun (embed + tam liste) gönderileceği kanal ID'si.
+    // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
+    outputChannelId: process.env.OUTPUT_CHANNEL_ID ?? json.rareScan?.outputChannelId ?? '',
     // Tüm üyeler bu süre içinde gelmezse hata verir (yarım listeyle devam etmez).
     // Kalabalık sunucular için yüksek tut.
     fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 300000,

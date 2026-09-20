@@ -218,10 +218,16 @@ kişileri listeler. **Sunucuya katılmaz** — sen sunuculara elle girersin, bot
 sadece içinde olduğun sunucuları tarar (otomatik katılma hesabı yaktığı için
 kaldırıldı).
 
-**Kullanım:**
-- `.nadir` → komutu yazdığın sunucuyu tarar
-- `.nadir <sunucu ID>` → o ID'li sunucuyu tarar (hesabın üye olduğu)
-- `.nadir <sunucu adı>` → adı eşleşen sunucuyu tarar
+**İki kullanım:**
+
+1. **Otomatik (sen sunucuya girince):** Hesabın bir sunucuya **elle** girdiği an
+   bot otomatik tarar ve sonucu gönderir. Katılmayı sen yaparsın, bot sadece
+   giriş olayını (`guildCreate`) yakalayıp tarar. Sonuç `outputChannelId`
+   kanalına (ayarlıysa) ve/veya webhook'a (embed + tam liste `.txt`) düşer.
+2. **Komut:**
+   - `.nadir` → komutu yazdığın sunucuyu tarar
+   - `.nadir <sunucu ID>` → o ID'li sunucuyu tarar (hesabın üye olduğu)
+   - `.nadir <sunucu adı>` → adı eşleşen sunucuyu tarar
 
 Sonuç: özet embed (kaç üye tarandı, rozet başına sayı) + tam listenin olduğu
 bir `.txt` eki. Bot tek istekte tüm üyeleri çeker (`query=''`, presence yok);
@@ -232,6 +238,8 @@ ayarlarsın. Nadir sayılan rozetler `rareScan.rareFlags` listesinden gelir.
 
 | Ayar | Açıklama |
 | --- | --- |
+| `autoScanOnJoin` | Sen bir sunucuya girince otomatik tarasın mı (varsayılan **açık**) |
+| `outputChannelId` | Otomatik tarama sonucunun gönderileceği kanal ID'si. Boşsa webhook'a gider. `.env`'de `OUTPUT_CHANNEL_ID` ile de verilebilir |
 | `fetchTimeoutMs` | Tüm üyeler bu süre içinde gelmezse **hata verir, yarım listeyle devam etmez**. Kalabalık sunucu için yüksek tut (varsayılan 300000 = 5dk) |
 | `rareFlags` | "Nadir" sayılan rozetler (Discord UserFlags isimleri) |
 
