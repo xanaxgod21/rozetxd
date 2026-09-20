@@ -78,8 +78,13 @@ async function deliverReport(client, guildName, report) {
           logger.warn(`[nadir] Kanala gönderilemedi: ${err.message}`);
           return false;
         });
-      if (ok) return true;
+      if (ok) {
+        logger.info(`[nadir] Sonuç kanala gönderildi: #${channel.name}`);
+        return true;
+      }
     }
+  } else {
+    logger.info('[nadir] outputGuildId ayarlı değil — kanal açma atlanıyor, webhook/dosya denenecek.');
   }
 
   // 2) Sabit çıktı kanalı
@@ -87,14 +92,20 @@ async function deliverReport(client, guildName, report) {
     const ch = client.channels.cache.get(rareScan.outputChannelId);
     if (ch?.send) {
       const ok = await ch.send(report).then(() => true).catch(() => false);
-      if (ok) return true;
+      if (ok) {
+        logger.info('[nadir] Sonuç sabit çıktı kanalına gönderildi.');
+        return true;
+      }
     }
   }
 
   // 3) Webhook (embed + .txt)
   if (webhook.enabled) {
     const ok = await webhook.sendReport(report);
-    if (ok) return true;
+    if (ok) {
+      logger.info('[nadir] Sonuç webhook\'a gönderildi.');
+      return true;
+    }
   }
 
   // 4) Hiçbiri olmadı: GARANTİ çıktı — listeyi VDS'te yerel dosyaya kaydet
