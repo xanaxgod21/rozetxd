@@ -1,22 +1,23 @@
 'use strict';
 
-const { scanInvite, buildReport, extractInviteCodes } = require('../utils/rareScan');
+const { resolveGuild, scanGuild, buildReport } = require('../utils/rareScan');
 
 module.exports = {
   name: 'nadir',
   aliases: ['rare', 'rozet'],
-  description: 'Verilen davetteki sunucuya girip nadir rozetli üyeleri listeler.',
-  usage: 'nadir <davet linki>',
+  description: 'Hesabın üye olduğu bir sunucudaki nadir rozetli üyeleri listeler.',
+  usage: 'nadir [sunucu ID veya adı]',
   category: 'araçlar',
-  cooldown: 30000,
+  cooldown: 10000,
 
   async run({ client, message, args, config, logger, webhook }) {
     const input = args.join(' ');
-    const [code] = extractInviteCodes(input);
+    const guild = resolveGuild(client, input, message);
 
-    if (!code && !input.trim()) {
+    if (!guild) {
       return message.channel.send(
-        `\`❌ Kullanım: ${config.prefix}nadir <davet linki>\``,
+        '`❌ Sunucu bulunamadı. Bu komutu taramak istediğin sunucuda çalıştır, ' +
+          `ya da ${config.prefix}nadir <sunucu ID> yaz (hesabın üye olduğu bir sunucu).\``,
       );
     }
 
@@ -24,17 +25,11 @@ module.exports = {
     const onStatus = (msg) => status.edit(`\`⏳ ${msg}\``).catch(() => null);
 
     try {
-      const result = await scanInvite(client, input || code, onStatus);
+      const result = await scanGuild(client, guild, onStatus);
       const report = buildReport(result);
 
       await status.edit(`\`✅ Tarama bitti: ${result.rareMembers.length} nadir rozetli üye\``).catch(() => null);
       await message.channel.send(report);
-
-      // İstenmişse sunucudan çık
-      if (config.rareScan.leaveAfterScan && !result.alreadyJoined) {
-        await result.guild.leave().catch(() => null);
-        logger.info(`[nadir] "${result.guildName}" sunucusundan çıkıldı (leaveAfterScan).`);
-      }
 
       if (config.webhook.commands) {
         await webhook.embed({

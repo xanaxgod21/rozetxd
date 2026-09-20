@@ -19,13 +19,8 @@
       ]
     }
   },
-  "watchChannelId": "1550921783199268974",
   "rareScan": {
-    "autoJoinFromWatchChannel": true,
-    "maxMembers": 0,
-    "cooldownMs": 5000,
     "fetchTimeoutMs": 300000,
-    "leaveAfterScan": true,
     "rareFlags": [
       "DISCORD_EMPLOYEE",
       "PARTNERED_SERVER_OWNER",

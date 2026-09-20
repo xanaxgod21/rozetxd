@@ -147,7 +147,6 @@ npm run dev             # dosya değiştikçe otomatik yeniden başlat
 | `WEBHOOK_URL` | — | Logların gideceği Discord webhook adresi |
 | `OWNER_IDS` | — | Komut kullanabilecek ID'ler, virgülle ayrılır. Boşsa sadece kendi hesabın |
 | `LOG_LEVEL` | — | `debug` \| `info` \| `warn` \| `error` |
-| `WATCH_CHANNEL_ID` | — | Nadir rozet taramasının dinleyeceği kanal ID'si |
 
 `config.json` dosyası (gizli olmayan tercihler): ön ek, durum (`presence`) ve hangi
 olayların webhook'a gideceği (`webhook.ready`, `webhook.commands`, `webhook.errors`).
@@ -164,8 +163,7 @@ olayların webhook'a gideceği (`webhook.ready`, `webhook.commands`, `webhook.er
 | `.durum <tip>` | `status` | Çevrimiçi durumu değiştirir (online/boşta/meşgul/görünmez) |
 | `.aktivite <tip> <metin>` | `oyna`, `izle`, `dinle`, `ozeldurum` | Profil aktivitesi (oynuyor/izliyor/dinliyor/özel durum) |
 | `.dongu <ac\|kapat>` | `rotate` | config.json'daki durum döngüsünü aç/kapat |
-| `.gir <davet>` | `join`, `katil` | Davetteki sunucuya girer ve kalır (tarama yapmaz). **Herkes kullanabilir** |
-| `.nadir <davet>` | `rare`, `rozet` | Davetteki sunucuya girip nadir rozetli üyeleri listeler |
+| `.nadir [sunucu]` | `rare`, `rozet` | Üye olunan sunucudaki nadir rozetli üyeleri listeler |
 
 ## Yeni komut ekleme
 
@@ -215,36 +213,26 @@ module.exports = {
 
 ## Nadir rozet taraması
 
-Bir sunucudaki nadir Discord rozetine (badge) sahip kişileri bulur.
+Hesabın **zaten üye olduğu** bir sunucudaki nadir Discord rozetine (badge) sahip
+kişileri listeler. **Sunucuya katılmaz** — sen sunuculara elle girersin, bot
+sadece içinde olduğun sunucuları tarar (otomatik katılma hesabı yaktığı için
+kaldırıldı).
 
-**İki kullanım şekli var:**
+**Kullanım:**
+- `.nadir` → komutu yazdığın sunucuyu tarar
+- `.nadir <sunucu ID>` → o ID'li sunucuyu tarar (hesabın üye olduğu)
+- `.nadir <sunucu adı>` → adı eşleşen sunucuyu tarar
 
-1. **İzlenen kanal (otomatik):** `WATCH_CHANNEL_ID` ile belirlediğin kanala bir
-   davet linki yazarsın (örn. `https://discord.gg/xxxx`), bot o sunucuya girip
-   nadir rozetlileri o kanala döker. Kanalı `.env`'deki `WATCH_CHANNEL_ID` veya
-   `config.json`'daki `watchChannelId` belirler.
+Sonuç: özet embed (kaç üye tarandı, rozet başına sayı) + tam listenin olduğu
+bir `.txt` eki. Bot tek istekte tüm üyeleri çeker (`query=''`, presence yok);
+kalabalık sunucuda sürebilir, `config.json > rareScan.fetchTimeoutMs` ile süreyi
+ayarlarsın. Nadir sayılan rozetler `rareScan.rareFlags` listesinden gelir.
 
-2. **Komut:** `.nadir <davet linki>` — istediğin kanaldan çalıştırırsın.
-
-Sonuç: bir özet embed (kaç üye tarandı, rozet başına sayı) + tam listenin
-olduğu bir `.txt` eki (her satır: `kullanıcı (id) — rozetleri`).
-
-**Üye çekme hızı:** Bot tek bir istekle sunucudaki *herkesi* ister
-(`query=''`, `limit=0`) ve presence verisi çekmez — bu, tam listeyi almanın en
-hızlı yoludur. Buradan sonrası Discord'un gateway'ine bağlıdır: üyeler 1000'erlik
-parçalar halinde Discord ne kadar hızlı yollarsa o hızda gelir. Client tarafında
-yapay bir bekleme yoktur; gateway'i daha fazla zorlamak bağlantıyı düşürür veya
-hesabı ban ettirir, hızlandırmaz.
-
-### Ayarlar (`config.json` > `rareScan`)
+## Ayarlar (`config.json` > `rareScan`)
 
 | Ayar | Açıklama |
 | --- | --- |
-| `autoJoinFromWatchChannel` | İzlenen kanaldaki davetlerle otomatik girsin mi |
-| `maxMembers` | Bundan kalabalık sunucuda tarama yapma. **`0` = sınır yok** (kalabalık sunucular da taranır) |
-| `cooldownMs` | İki tarama arası bekleme (spam-join engeli). Düşük = daha hızlı ardışık tarama, daha yüksek ban riski. `0` = beklemesiz (varsayılan 5000) |
 | `fetchTimeoutMs` | Tüm üyeler bu süre içinde gelmezse **hata verir, yarım listeyle devam etmez**. Kalabalık sunucu için yüksek tut (varsayılan 300000 = 5dk) |
-| `leaveAfterScan` | Tarama bitince sunucudan otomatik çıksın mı (varsayılan **açık**) |
 | `rareFlags` | "Nadir" sayılan rozetler (Discord UserFlags isimleri) |
 
 Varsayılan nadir rozetler: Discord Personeli, Partner, HypeSquad Events,
@@ -252,11 +240,10 @@ Bug Hunter (1 & 2), Erken Destekçi, Erken Doğrulanmış Bot Geliştirici,
 Moderatör Programı Mezunu. HypeSquad evleri ve Aktif Geliştirici gibi kolay
 alınanlar varsayılanda **yok** — istersen `rareFlags`'e ekleyebilirsin.
 
-> [!CAUTION]
-> Davet linkiyle **otomatik sunucuya girmek** ve **tüm üye listesini çekmek**,
-> Discord'un otomasyon tespitinde en çok işaretlediği iki davranıştır. Bu özellik
-> ana hesabının ban riskini belirgin şekilde artırır. `maxMembers` ve
-> `cooldownMs`'i düşük tutmak riski azaltır ama sıfırlamaz.
+> [!NOTE]
+> Bu tarama sunucuya **katılmaz**, sadece hesabın zaten üye olduğu sunucuları
+> tarar. Yine de **tüm üye listesini çekmek** Discord'un otomasyon tespitini
+> tetikleyebilir; nadir de olsa hesabın için bir risktir.
 
 ## Profil / görünüm
 

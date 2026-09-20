@@ -5,20 +5,23 @@ const { config } = require('../config');
 const { labelFor, getRareBadges } = require('./badges');
 const logger = require('./logger');
 
-// discord.gg/kod, discord.com/invite/kod, discordapp.com/invite/kod
-const INVITE_REGEX =
-  /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([\w-]+)/gi;
+/**
+ * Girdiye göre, hesabın ZATEN ÜYE OLDUĞU bir sunucuyu bulur.
+ * - input boşsa: komutun yazıldığı sunucu (message.guild)
+ * - input bir ID ise: o ID'li sunucu
+ * - input bir isimse: adı eşleşen ilk sunucu
+ * Hiçbiri değilse null (sunucuya KATILMAYIZ; sadece üye olunanlar taranır).
+ */
+function resolveGuild(client, input, message) {
+  const query = (input ?? '').trim();
 
-/** Metindeki tüm davet kodlarını (tekilleştirilmiş) çıkarır. */
-function extractInviteCodes(text) {
-  if (!text) return [];
-  const codes = new Set();
-  let match;
-  INVITE_REGEX.lastIndex = 0;
-  while ((match = INVITE_REGEX.exec(text)) !== null) {
-    codes.add(match[1]);
-  }
-  return [...codes];
+  if (!query) return message?.guild ?? null;
+
+  const byId = client.guilds.cache.get(query);
+  if (byId) return byId;
+
+  const lower = query.toLowerCase();
+  return client.guilds.cache.find((g) => g.name.toLowerCase().includes(lower)) ?? null;
 }
 
 /**
@@ -55,47 +58,22 @@ async function fetchAllMembers(guild, timeoutMs) {
 }
 
 /**
- * Bir daveti kabul edip sunucuya girer, üyeleri çeker ve nadir rozetlileri süzer.
+ * Hesabın ZATEN ÜYE OLDUĞU bir sunucuyu tarar, nadir rozetlileri süzer.
+ * Sunucuya KATILMAZ (acceptInvite yok) — hesabı yakan tetikleyici buydu.
  *
  * @param {import('discord.js-selfbot-v13').Client} client
- * @param {string} input davet linki veya kodu
+ * @param {import('discord.js-selfbot-v13').Guild} guild üye olunan sunucu
  * @param {(msg: string) => void} [onStatus] ara durum bildirimi
- * @returns {Promise<{guild, alreadyJoined:boolean, total:number, timedOut:boolean, rareMembers:Array}>}
+ * @returns {Promise<{guild, guildName:string, total:number, timedOut:boolean, rareMembers:Array}>}
  */
-async function scanInvite(client, input, onStatus = () => {}) {
+async function scanGuild(client, guild, onStatus = () => {}) {
   const { rareScan } = config;
 
-  const [code] = extractInviteCodes(input);
-  const inviteCode = code ?? input.trim();
-  if (!inviteCode) throw new Error('Geçerli bir davet linki/kodu bulunamadı.');
+  if (!guild?.members) throw new Error('Geçerli bir sunucu bulunamadı.');
 
-  // Önce önizleme: üye sayısını görüp katılmadan sınırı kontrol edelim
-  onStatus('Davet inceleniyor...');
-  const preview = await client.fetchInvite(inviteCode).catch((err) => {
-    throw new Error(`Davet geçersiz veya süresi dolmuş: ${err.message}`);
-  });
+  const guildName = guild.name ?? 'bilinmeyen sunucu';
 
-  const guildName = preview.guild?.name ?? 'bilinmeyen sunucu';
-  const approx = preview.memberCount ?? preview.guild?.approximateMemberCount ?? 0;
-
-  // maxMembers 0 (veya negatif) => sınır yok, kalabalık sunucular da taranır
-  if (rareScan.maxMembers > 0 && approx && approx > rareScan.maxMembers) {
-    throw new Error(
-      `"${guildName}" çok kalabalık (~${approx} üye, sınır ${rareScan.maxMembers}). ` +
-        'config.json > rareScan.maxMembers = 0 yaparsan sınır kalkar.',
-    );
-  }
-
-  const alreadyJoined = Boolean(preview.guild?.id && client.guilds.cache.has(preview.guild.id));
-
-  onStatus(alreadyJoined ? `"${guildName}" zaten katılımda, taranıyor...` : `"${guildName}" sunucusuna giriliyor...`);
-  const guild = await client.acceptInvite(inviteCode).catch((err) => {
-    throw new Error(`Sunucuya girilemedi: ${err.message}`);
-  });
-
-  if (!guild?.members) throw new Error('Sunucu nesnesi alınamadı (davet bir kanala mı ait?).');
-
-  onStatus('Tüm üyeler çekiliyor (kalabalık sunucuda uzun sürebilir, bekleniyor)...');
+  onStatus(`"${guildName}" taranıyor — tüm üyeler çekiliyor (kalabalık sunucuda uzun sürebilir)...`);
   const members = await fetchAllMembers(guild, rareScan.fetchTimeoutMs);
   const timedOut = false;
 
@@ -117,7 +95,7 @@ async function scanInvite(client, input, onStatus = () => {}) {
 
   logger.info(`[nadir] "${guildName}": ${members.size} üyeden ${rareMembers.length} nadir rozetli bulundu.`);
 
-  return { guild, guildName, alreadyJoined, total: members.size, timedOut, rareMembers };
+  return { guild, guildName, total: members.size, timedOut, rareMembers };
 }
 
 /**
@@ -190,4 +168,4 @@ function buildReport(result) {
   return { embeds: [embed], files: [attachment] };
 }
 
-module.exports = { extractInviteCodes, scanInvite, buildReport };
+module.exports = { resolveGuild, scanGuild, buildReport };
