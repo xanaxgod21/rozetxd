@@ -21,6 +21,9 @@
   },
   "rareScan": {
     "autoScanOnJoin": true,
+    "outputGuildId": "",
+    "outputCategoryId": "",
+    "channelSuffix": "-rozetler",
     "outputChannelId": "",
     "fetchTimeoutMs": 300000,
     "rareFlags": [

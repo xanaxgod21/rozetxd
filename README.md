@@ -221,9 +221,13 @@ kaldırıldı).
 **İki kullanım:**
 
 1. **Otomatik (sen sunucuya girince):** Hesabın bir sunucuya **elle** girdiği an
-   bot otomatik tarar ve sonucu gönderir. Katılmayı sen yaparsın, bot sadece
-   giriş olayını (`guildCreate`) yakalayıp tarar. Sonuç `outputChannelId`
-   kanalına (ayarlıysa) ve/veya webhook'a (embed + tam liste `.txt`) düşer.
+   bot otomatik tarar. Katılmayı sen yaparsın, bot sadece giriş olayını
+   (`guildCreate`) yakalayıp tarar. Sonuç şu sırayla teslim edilir:
+   - `outputGuildId` ayarlıysa → o **kontrol sunucunda** taranan sunucu için
+     `<isim>-rozetler` adında bir kanal **açar** (aynı isim varsa tekrar
+     kullanır) ve raporu oraya atar.
+   - yoksa `outputChannelId` (tek sabit kanal) → oraya atar.
+   - o da yoksa webhook (embed + tam liste `.txt`).
 2. **Komut:**
    - `.nadir` → komutu yazdığın sunucuyu tarar
    - `.nadir <sunucu ID>` → o ID'li sunucuyu tarar (hesabın üye olduğu)
@@ -239,7 +243,10 @@ ayarlarsın. Nadir sayılan rozetler `rareScan.rareFlags` listesinden gelir.
 | Ayar | Açıklama |
 | --- | --- |
 | `autoScanOnJoin` | Sen bir sunucuya girince otomatik tarasın mı (varsayılan **açık**) |
-| `outputChannelId` | Otomatik tarama sonucunun gönderileceği kanal ID'si. Boşsa webhook'a gider. `.env`'de `OUTPUT_CHANNEL_ID` ile de verilebilir |
+| `outputGuildId` | **Kendi kontrol sunucun** (kanal açma yetkin olan). Bot her taranan sunucu için `<isim>-rozetler` kanalı açar. `.env`'de `OUTPUT_GUILD_ID` |
+| `outputCategoryId` | (Opsiyonel) Açılan kanalların konacağı kategori ID'si |
+| `channelSuffix` | Kanal adının sonuna eklenen ek (varsayılan `-rozetler`) |
+| `outputChannelId` | `outputGuildId` yoksa sonucun gideceği tek sabit kanal. O da yoksa webhook |
 | `fetchTimeoutMs` | Tüm üyeler bu süre içinde gelmezse **hata verir, yarım listeyle devam etmez**. Kalabalık sunucu için yüksek tut (varsayılan 300000 = 5dk) |
 | `rareFlags` | "Nadir" sayılan rozetler (Discord UserFlags isimleri) |
 

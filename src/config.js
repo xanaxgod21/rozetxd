@@ -48,7 +48,14 @@ const config = {
   rareScan: {
     // Sen bir sunucuya elle girdiğin an bot otomatik tarasın mı
     autoScanOnJoin: json.rareScan?.autoScanOnJoin ?? true,
-    // Otomatik tarama sonucunun (embed + tam liste) gönderileceği kanal ID'si.
+    // Sonuçların yazılacağı KONTROL sunucusu (senin, kanal açma yetkin olan).
+    // Bot burada her taranan sunucu için "<isim>-rozetler" kanalı açar.
+    outputGuildId: process.env.OUTPUT_GUILD_ID ?? json.rareScan?.outputGuildId ?? '',
+    // İsteğe bağlı: açılan kanalların konacağı kategori ID'si.
+    outputCategoryId: process.env.OUTPUT_CATEGORY_ID ?? json.rareScan?.outputCategoryId ?? '',
+    // Açılan kanal adının sonuna eklenecek ek. "-rozetler" -> "xx-rozetler"
+    channelSuffix: json.rareScan?.channelSuffix ?? '-rozetler',
+    // Alternatif: outputGuildId yoksa buraya (tek sabit kanal ID) gönderir.
     // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
     outputChannelId: process.env.OUTPUT_CHANNEL_ID ?? json.rareScan?.outputChannelId ?? '',
     // Tüm üyeler bu süre içinde gelmezse hata verir (yarım listeyle devam etmez).

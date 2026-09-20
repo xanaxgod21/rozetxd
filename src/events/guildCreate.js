@@ -1,6 +1,7 @@
 'use strict';
 
 const { scanGuild, buildReport } = require('../utils/rareScan');
+const { deliverReport } = require('../utils/deliver');
 
 // Aynı anda tek otomatik tarama
 let scanning = false;
@@ -30,34 +31,9 @@ module.exports = {
       const result = await scanGuild(client, guild);
       const report = buildReport(result);
 
-      let posted = false;
-
-      // 1) Ayarlı bir çıktı kanalı varsa oraya tam raporu at
-      const chId = rareScan.outputChannelId;
-      if (chId) {
-        const channel = client.channels.cache.get(chId);
-        if (channel?.send) {
-          await channel.send(report).catch((err) =>
-            logger.warn(`[nadir] Çıktı kanalına gönderilemedi: ${err.message}`),
-          );
-          posted = true;
-        } else {
-          logger.warn(`[nadir] outputChannelId (${chId}) bulunamadı veya yazılamıyor.`);
-        }
-      }
-
-      // 2) Webhook varsa oraya da tam raporu (embed + .txt) at
-      if (webhook.enabled) {
-        await webhook.sendReport(report);
-        posted = true;
-      }
-
-      if (!posted) {
-        logger.warn(
-          '[nadir] Sonuç gönderilecek yer yok. config.json > rareScan.outputChannelId ' +
-            'veya .env WEBHOOK_URL ayarla.',
-        );
-      }
+      // Kontrol sunucusunda "<isim>-rozetler" kanalı aç/bul ve oraya at
+      // (yoksa sabit kanal, yoksa webhook)
+      await deliverReport(client, result.guildName, report);
 
       logger.info(`[nadir] "${result.guildName}" otomatik tarandı: ${result.rareMembers.length} nadir rozetli.`);
     } catch (err) {
