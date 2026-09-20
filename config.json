@@ -32,7 +32,7 @@
     "autoScanOnJoin": true,
     "outputGuildId": "",
     "outputCategoryId": "",
-    "channelSuffix": "-rozetler",
+    "channelSuffix": "-loglar",
     "outputChannelId": "",
     "fetchTimeoutMs": 90000,
     "deepScan": true,

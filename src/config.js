@@ -79,7 +79,7 @@ const config = {
     // İsteğe bağlı: açılan kanalların konacağı kategori ID'si.
     outputCategoryId: firstNonEmpty(process.env.OUTPUT_CATEGORY_ID, json.rareScan?.outputCategoryId),
     // Açılan kanal adının sonuna eklenecek ek. "-rozetler" -> "xx-rozetler"
-    channelSuffix: json.rareScan?.channelSuffix ?? '-rozetler',
+    channelSuffix: json.rareScan?.channelSuffix ?? '-loglar',
     // Alternatif: outputGuildId yoksa buraya (tek sabit kanal ID) gönderir.
     // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
     outputChannelId: firstNonEmpty(process.env.OUTPUT_CHANNEL_ID, json.rareScan?.outputChannelId),
