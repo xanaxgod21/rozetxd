@@ -23,7 +23,13 @@ module.exports = {
     // Ama "everyone: true" işaretli komutları herkes tetikleyebilir; komutu
     // işleyen token hesabı (self-bot) işi yapar.
     const isOwner = config.ownerIds.includes(message.author.id);
-    if (!command.everyone && !isOwner) return;
+    logger.info(
+      `[komut] "${config.prefix}${commandName}" alındı | yazan=${message.author.id} | sahip mi=${isOwner} | sahipler=[${config.ownerIds.join(',')}]`,
+    );
+    if (!command.everyone && !isOwner) {
+      logger.info(`[komut] ${commandName} REDDEDİLDİ: yazan sahip değil. OWNER_IDS'e bu ID'yi ekle: ${message.author.id}`);
+      return;
+    }
 
     // Basit cooldown — arka arkaya spam komutu engeller
     const cooldownMs = command.cooldown ?? DEFAULT_COOLDOWN_MS;
