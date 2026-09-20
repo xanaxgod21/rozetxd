@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { config } = require('../config');
 const logger = require('./logger');
 const webhook = require('./webhook');
@@ -95,8 +97,26 @@ async function deliverReport(client, guildName, report) {
     if (ok) return true;
   }
 
+  // 4) Hiçbiri olmadı: GARANTİ çıktı — listeyi VDS'te yerel dosyaya kaydet
+  try {
+    const file = report.files?.[0];
+    if (file?.attachment) {
+      const dir = path.join(__dirname, '..', '..', 'taramalar');
+      fs.mkdirSync(dir, { recursive: true });
+      const filePath = path.join(dir, file.name ?? `tarama-${Date.now()}.txt`);
+      fs.writeFileSync(filePath, file.attachment);
+      logger.warn(
+        `[nadir] Discord'a gönderilemedi (kanal/webhook ayarlı değil ya da yetki yok). ` +
+          `Liste yerel dosyaya kaydedildi: ${filePath}`,
+      );
+      return true;
+    }
+  } catch (err) {
+    logger.error(`[nadir] Yerel dosyaya da kaydedilemedi: ${err.message}`);
+  }
+
   logger.warn(
-    '[nadir] Sonuç gönderilecek yer yok. config.json > rareScan.outputGuildId ' +
+    '[nadir] Sonuç hiçbir yere gönderilemedi. config.json > rareScan.outputGuildId ' +
       '(kanal açma yetkin olan sunucu) ya da outputChannelId / .env WEBHOOK_URL ayarla.',
   );
   return false;
