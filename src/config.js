@@ -5,7 +5,11 @@ const fs = require('node:fs');
 
 // .env her zaman proje kökünden okunur; böylece botu hangi dizinden
 // başlatırsan başlat (systemd, pm2, docker) ayarlar bulunur.
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+//
+// override: true -> bu klasörün .env'i her zaman kazanır. Sistemde global bir
+// TOKEN ortam değişkeni olsa bile onu ezer. Aynı VDS'te iki bot çalıştırırken
+// ikisinin aynı token'a düşmesini engeller: her bot kendi .env'ini kullanır.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env'), override: true });
 
 /** .env'deki virgüllü listeyi diziye çevirir. */
 function parseList(value) {
