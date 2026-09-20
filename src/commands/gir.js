@@ -1,6 +1,6 @@
 'use strict';
 
-const { extractInviteCodes, ensureSessionId } = require('../utils/rareScan');
+const { extractInviteCodes } = require('../utils/rareScan');
 
 module.exports = {
   name: 'gir',
@@ -37,7 +37,6 @@ module.exports = {
         return status.edit(`\`ℹ️ "${guildName}" sunucusunda zaten varsın.\``);
       }
 
-      ensureSessionId(client);
       const guild = await client.acceptInvite(inviteCode).catch((err) => {
         throw new Error(`Sunucuya girilemedi: ${err.message}`);
       });
