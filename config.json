@@ -13,9 +13,18 @@
       "enabled": false,
       "intervalMs": 15000,
       "items": [
-        { "type": "oyna", "text": "rozetxd" },
-        { "type": "izle", "text": "sunucuları" },
-        { "type": "dinle", "text": "komutları" }
+        {
+          "type": "oyna",
+          "text": "rozetxd"
+        },
+        {
+          "type": "izle",
+          "text": "sunucuları"
+        },
+        {
+          "type": "dinle",
+          "text": "komutları"
+        }
       ]
     }
   },
@@ -26,6 +35,10 @@
     "channelSuffix": "-rozetler",
     "outputChannelId": "",
     "fetchTimeoutMs": 90000,
+    "deepScan": true,
+    "deepScanMaxRequests": 350,
+    "deepScanTimeBudgetMs": 180000,
+    "deepScanDelayMs": 250,
     "rareFlags": [
       "DISCORD_EMPLOYEE",
       "PARTNERED_SERVER_OWNER",

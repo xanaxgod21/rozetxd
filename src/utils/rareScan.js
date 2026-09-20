@@ -5,6 +5,11 @@ const { config } = require('../config');
 const { labelFor, getRareBadges } = require('./badges');
 const logger = require('./logger');
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Derin tarama için isim ön-ekleri (Türkçe karakterler dahil)
+const DEEP_CHARSET = 'abcdefghijklmnopqrstuvwxyzçğıioöşü0123456789_.'.split('');
+
 /**
  * Girdiye göre, hesabın ZATEN ÜYE OLDUĞU bir sunucuyu bulur.
  * - input boşsa: komutun yazıldığı sunucu (message.guild)
@@ -65,6 +70,51 @@ async function fetchAllMembers(guild, timeoutMs) {
 }
 
 /**
+ * DERİN TARAMA: isim ön-ekiyle (a, b, ... aa, ab, ...) tekrar tekrar sorgu atıp
+ * mümkün olduğunca çok üye toplar. Büyük sunucuda `query=''`'in getirdiği küçük
+ * dilimden çok daha fazlasını bulur. Gelen üyeler guild.members.cache'de birikir.
+ *
+ * Sınırlar (config.rareScan): deepScanMaxRequests (istek tavanı),
+ * deepScanTimeBudgetMs (süre bütçesi), deepScanDelayMs (istekler arası bekleme).
+ * Bir ön-ek tavanı (100) doldurursa daha derine iner (o+harf), yoksa durur.
+ *
+ * @returns {Promise<{members, requests:number, stoppedEarly:boolean}>}
+ */
+async function fetchMembersDeep(guild, opts, onStatus = () => {}) {
+  const { maxRequests, timeBudgetMs, delayMs, perQueryLimit = 100, maxDepth = 3 } = opts;
+  const start = Date.now();
+  let requests = 0;
+
+  const queue = [...DEEP_CHARSET];
+
+  while (queue.length && requests < maxRequests && Date.now() - start < timeBudgetMs) {
+    const prefix = queue.shift();
+    try {
+      requests += 1;
+      const batch = await guild.members.fetch({
+        query: prefix,
+        limit: perQueryLimit,
+        withPresences: false,
+        time: 10000,
+      });
+      // Tavan doldu -> bu ön-ekte daha çok üye var, bir kademe derine in
+      if (batch.size >= perQueryLimit && prefix.length < maxDepth) {
+        for (const ch of DEEP_CHARSET) queue.push(prefix + ch);
+      }
+    } catch {
+      // bu ön-ekte zaman aşımı/hata -> atla
+    }
+
+    if (requests % 10 === 0) {
+      onStatus(`Derin tarama: ${guild.members.cache.size} üye, ${requests}/${maxRequests} sorgu...`);
+    }
+    if (delayMs) await sleep(delayMs);
+  }
+
+  return { members: guild.members.cache, requests, stoppedEarly: queue.length > 0 };
+}
+
+/**
  * Hesabın ZATEN ÜYE OLDUĞU bir sunucuyu tarar, nadir rozetlileri süzer.
  * Sunucuya KATILMAZ (acceptInvite yok) — hesabı yakan tetikleyici buydu.
  *
@@ -80,8 +130,28 @@ async function scanGuild(client, guild, onStatus = () => {}) {
 
   const guildName = guild.name ?? 'bilinmeyen sunucu';
 
-  onStatus(`"${guildName}" taranıyor — üyeler çekiliyor (kalabalık sunucuda uzun sürebilir)...`);
-  const { members, timedOut } = await fetchAllMembers(guild, rareScan.fetchTimeoutMs);
+  let members;
+  let timedOut;
+
+  if (rareScan.deepScan) {
+    // Büyük sunucularda kapsamı artırmak için isim ön-eki taraması
+    onStatus(`"${guildName}" derin taranıyor — üyeler ön-ek ön-ek çekiliyor...`);
+    const res = await fetchMembersDeep(
+      guild,
+      {
+        maxRequests: rareScan.deepScanMaxRequests,
+        timeBudgetMs: rareScan.deepScanTimeBudgetMs,
+        delayMs: rareScan.deepScanDelayMs,
+      },
+      onStatus,
+    );
+    members = res.members;
+    timedOut = res.stoppedEarly; // tavan/süre dolduysa kısmi say
+    logger.info(`[nadir] Derin tarama bitti: ${res.requests} sorgu, ${members.size} üye toplandı.`);
+  } else {
+    onStatus(`"${guildName}" taranıyor — üyeler çekiliyor...`);
+    ({ members, timedOut } = await fetchAllMembers(guild, rareScan.fetchTimeoutMs));
+  }
 
   const rareMembers = [];
   for (const member of members.values()) {

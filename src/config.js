@@ -70,10 +70,19 @@ const config = {
     // Alternatif: outputGuildId yoksa buraya (tek sabit kanal ID) gönderir.
     // Boşsa webhook'a gönderilir (WEBHOOK_URL varsa).
     outputChannelId: process.env.OUTPUT_CHANNEL_ID ?? json.rareScan?.outputChannelId ?? '',
-    // Üye çekme için süre bütçesi. Süre dolarsa o ana kadar gelen üyelerle
-    // (kısmi) devam eder. Büyük sunucuda daha çok üye için artır, daha çabuk
-    // sonuç için azalt.
+    // Üye çekme için süre bütçesi (deepScan kapalıyken). Süre dolarsa o ana
+    // kadar gelen üyelerle (kısmi) devam eder.
     fetchTimeoutMs: json.rareScan?.fetchTimeoutMs ?? 90000,
+    // DERİN TARAMA: isim ön-ekiyle (a,b,c,...) tekrar tekrar sorgu atıp büyük
+    // sunucularda çok daha fazla üye toplar. Kapatmak için false yap.
+    deepScan: json.rareScan?.deepScan ?? true,
+    // Derin taramada en fazla kaç sorgu atılsın (yüksek = daha çok üye, daha
+    // uzun süre, daha yüksek ban riski).
+    deepScanMaxRequests: json.rareScan?.deepScanMaxRequests ?? 350,
+    // Derin tarama toplam süre bütçesi (ms).
+    deepScanTimeBudgetMs: json.rareScan?.deepScanTimeBudgetMs ?? 180000,
+    // Sorgular arası bekleme (ms) — düşük = hızlı ama daha riskli.
+    deepScanDelayMs: json.rareScan?.deepScanDelayMs ?? 250,
     // "Nadir" sayılan rozetler (UserFlags isimleri)
     rareFlags: json.rareScan?.rareFlags ?? [
       'DISCORD_EMPLOYEE',
